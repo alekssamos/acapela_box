@@ -10,7 +10,7 @@ from setuptools import setup
 
 test:str = "ok"
 NAME = 'acapela_box'
-VERSION = '0.1'
+VERSION = '0.2'
 
 
 with open(pathjoin(dirname(__file__), 'README.md')) as f:

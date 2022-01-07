@@ -20,6 +20,11 @@ class AcapelaBox():
         self.index_page = self.session.get(self.base_url+"index.php").content.decode("UTF-8")
         return self.index_page
 
+    def login(self, username:str, password:str, mode:Optional[str] = "login")->int:
+        data = {"username":username, "password":password, "mode":mode}
+        d:Callable = pq(self.session.post(self.base_url+"login.php", data=data).content.decode("UTF-8"))
+        return int(d("root status").text())
+
     def get_languages(self)->List[dict]:
         htmlpage:str = self.index_page
         d:Callable = pq(htmlpage)
