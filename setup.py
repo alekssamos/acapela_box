@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-from os.path import dirname
-from os.path import join as pathjoin
-from setuptools import find_packages
-from setuptools import setup
+import os # type: ignore
+import sys # type: ignore
+from os.path import dirname # type: ignore
+from os.path import join as pathjoin # type: ignore
+from setuptools import find_packages # type: ignore
+from setuptools import setup # type: ignore
 
 
 test:str = "ok"
