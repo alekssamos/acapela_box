@@ -1,14 +1,18 @@
 import re
-import json
 import time
 import math
-from typing import List, Optional, Iterable, Callable
+from urllib.parse import urlencode
+from typing import List, Optional, Iterable, Callable, Union
 import requests
 from pyquery import PyQuery as pq # type: ignore
 
 class AcapelaBox():
     base_url:str = "https://acapela-box.com/AcaBox/"
     session:requests.Session = requests.Session()
+    # session.verify=False
+    # session.proxies = {
+        # "https": "http://127.0.0.1:8888"
+    # }
     session.headers.update({
         "User-Agent": r"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0"
     })
@@ -20,10 +24,39 @@ class AcapelaBox():
         self.index_page = self.session.get(self.base_url+"index.php").content.decode("UTF-8")
         return self.index_page
 
-    def login(self, username:str, password:str, mode:Optional[str] = "login")->int:
-        data = {"username":username, "password":password, "mode":mode}
-        d:Callable = pq(self.session.post(self.base_url+"login.php", data=data).content.decode("UTF-8"))
-        return int(d("root status").text())
+    def login(self, login:str, password:str, mode:Optional[str] = "login")->dict:
+        headers = self.session.headers.copy()
+        headers.update({
+            "Referer": self.base_url+"index.php",
+            "Content-type": "application/x-www-form-urlencoded",
+            "Origin": "https://acapela-box.com",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin"
+        })
+        data = urlencode({"login":login, "password":password, "mode":mode})
+        d:Callable = pq(self.session.post(self.base_url+"login.php", headers=headers, data=data).content.decode("UTF-8"))
+        root:Callable = d("root")
+        if int(root("status").text()) == 0:
+            raise ValueError("username or password is not correct")
+        account:Callable = root("account")
+        transaction:Callable = root("transaction")
+        return {
+            "status": int(root("status").text()),
+            "login": root("login").text(),
+            "account": {
+                "characters": account("characters").text(),
+                "id": int(account("id").text()),
+            },
+            "firstname": root("firstname").text(),
+            "logincount": int(root("logincount").text()),
+            "firstlogin": root("firstlogin").text(),
+            "transaction": {
+                "id": int(transaction("id").text()),
+                "boxname": transaction("boxname").text(),
+                "acaboxfilename": transaction("acaboxfilename").text()
+            }
+        }
 
     def get_languages(self)->List[dict]:
         htmlpage:str = self.index_page
@@ -76,7 +109,7 @@ class AcapelaBox():
 
     def get_text_info(self, text:str, voice:str, voiceid:str, byline:Optional[int] = 0)->dict:
         data = {"voice":voice,"voiceid":voiceid,"byline":byline}
-        j = json.loads(self.session.post(self.base_url+"GetTextInfo.php", data=data).content.decode("UTF-8"))
+        j = self.session.post(self.base_url+"GetTextInfo.php", data=data).json()
         return j
 
     def dovaas(
@@ -104,7 +137,7 @@ class AcapelaBox():
             "codecMP3":codecMP3,
             "ts":ts
         }
-        j = json.loads(self.session.post(self.base_url+"dovaas.php", data=data).content.decode("UTF-8"))
+        j = self.session.post(self.base_url+"dovaas.php", data=data).json()
         return j
 
     def acabox_flashsession(
@@ -131,7 +164,7 @@ class AcapelaBox():
             "text":text,
             "session":session
         }
-        j = json.loads(self.session.post(self.base_url+"acabox-flashsession.php", data=data).content.decode("UTF-8"))
+        j = self.session.post(self.base_url+"acabox-flashsession.php", data=data).json()
         return j
 
     def download_file(self, url:str, filename:str)->int:
