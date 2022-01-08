@@ -1,8 +1,6 @@
 # acapela_box
 acapela_ voices online not official API
 
-## installing
-`pip install https://github.com/alekssamos/acapela_box/archive/refs/heads/master.zip`
-
-## using
-see file ./example1.py
+In this version, only the parser with a list of languages and voices will be updated.
+This version is no longer supported.
+Development continued in the main branch.
