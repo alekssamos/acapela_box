@@ -1,3 +1,7 @@
+"""data mapping module for acapela_box
+
+this file includes languages, voices and audioformats"""
+
 # generated automatically
 
 import json

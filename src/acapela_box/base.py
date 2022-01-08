@@ -1,3 +1,4 @@
+"""Base classes for Acapela-box.com website communication."""
 import re
 import time
 import math
@@ -5,6 +6,29 @@ from urllib.parse import urlencode
 from typing import List, Optional, Iterable, Callable, Union
 import requests
 from . import data
+
+class AcapelaBoxError(Exception):
+    """Base exception class for Acapela Box related errors."""
+
+
+class InvalidCredentialsError(AcapelaBoxError):
+    """Exception class for invalid credentials error."""
+
+
+class NeedsUpdateError(AcapelaBoxError):
+    """Exception class thrown when the code cannot scrap the website.
+
+    Basically, it means that the module needs some update to keep interfacing
+    with the Acapela Box website.
+    """
+
+
+class LanguageNotSupportedError(AcapelaBoxError):
+    """Exception class thrown when the language is not supported.
+
+    For a complete list of supported languages, see data.py.
+    """
+
 
 class AcapelaBox():
     base_url:str = "https://acapela-box.com/AcaBox/"
@@ -29,7 +53,10 @@ class AcapelaBox():
         return string[string.index(start)+len(start):string.index(end)]
 
     def tag_between(self, tagname:str, string:str)->str:
-        return self.between(f"<{tagname}>", f"</{tagname}>", string)
+        try:
+            return self.between(f"<{tagname}>", f"</{tagname}>", string)
+        except ValueError:
+            raise NeedsUpdateError(f"Can't get the information from {tagname}")
 
     def login(self, login:str, password:str, mode:Optional[str] = "login")->dict:
         self.get_index_page()
@@ -46,7 +73,7 @@ class AcapelaBox():
         d:str = self.session.post(self.base_url+"login.php", headers=headers, data=data).text
         root:str = self.tag_between("root", d)
         if int(self.tag_between("status", root)) == 0:
-            raise ValueError("username or password is not correct")
+            raise InvalidCredentialsError("Wrong couple of login/password.")
         account:str = self.tag_between("account", root)
         transaction:str = self.tag_between("transaction", root)
         return {
@@ -74,9 +101,11 @@ class AcapelaBox():
 
     def get_voices(self, iso:str)->List[dict]:
         if not type(iso) == str:
-            ValueError("iso must be str")
-        if "-" not in iso or len(iso) < 5:
-            ValueError("iso must be country code hyphen language code two letters")
+            raise TypeError("iso must be str")
+        if "-" not in iso or len(iso) < 5 or len(iso) > 9:
+            raise ValueError("iso must be country code hyphen language code two letters. Example: en-US")
+        if iso not in [v['language'] for v in data.voices]:
+            raise LanguageNotSupportedError(f"Iso code {iso} not found")
         return [v for v in data.voices if v['language'] == iso]
 
     def get_text_info(self, text:str, voice:str, voiceid:str, byline:Optional[int] = 0)->dict:
