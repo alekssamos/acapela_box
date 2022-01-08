@@ -82,7 +82,7 @@ class AcapelaBox():
     def get_text_info(self, text:str, voice:str, voiceid:str, byline:Optional[int] = 0)->dict:
         self.get_index_page()
         data = {"voice":voice,"voiceid":voiceid,"byline":byline}
-        j = self.session.post(self.base_url+"GetTextInfo.php", data=data).json()
+        j:dict = self.session.post(self.base_url+"GetTextInfo.php", data=data).json()
         return j
 
     def dovaas(
@@ -111,7 +111,7 @@ class AcapelaBox():
             "codecMP3":codecMP3,
             "ts":ts
         }
-        j = self.session.post(self.base_url+"dovaas.php", data=data).json()
+        j:dict = self.session.post(self.base_url+"dovaas.php", data=data).json()
         return j
 
     def acabox_flashsession(
@@ -139,7 +139,7 @@ class AcapelaBox():
             "text":text,
             "session":session
         }
-        j = self.session.post(self.base_url+"acabox-flashsession.php", data=data).json()
+        j:dict = self.session.post(self.base_url+"acabox-flashsession.php", data=data).json()
         return j
 
     def download_file(self, url:str, filename:str)->int:
