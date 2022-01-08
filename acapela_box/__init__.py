@@ -4,7 +4,7 @@ import math
 from urllib.parse import urlencode
 from typing import List, Optional, Iterable, Callable, Union
 import requests
-from pyquery import PyQuery as pq # type: ignore
+from . import data
 
 class AcapelaBox():
     base_url:str = "https://acapela-box.com/AcaBox/"
@@ -18,13 +18,21 @@ class AcapelaBox():
     })
     index_page:str = ''
     def __init__(self):
-        self.get_index_page()
+        pass  
 
-    def get_index_page(self)->str:
-        self.index_page = self.session.get(self.base_url+"index.php").content.decode("UTF-8")
+    def get_index_page(self, reload_page:Optional[bool] = False)->str:
+        if reload_page or self.index_page == '':
+            self.index_page = self.session.get(self.base_url+"index.php").text
         return self.index_page
 
+    def between(self, start:str, end:str, string:str)->str:
+        return string[string.index(start)+len(start):string.index(end)]
+
+    def tag_between(self, tagname:str, string:str)->str:
+        return self.between(f"<{tagname}>", f"</{tagname}>", string)
+
     def login(self, login:str, password:str, mode:Optional[str] = "login")->dict:
+        self.get_index_page()
         headers = self.session.headers.copy()
         headers.update({
             "Referer": self.base_url+"index.php",
@@ -35,79 +43,44 @@ class AcapelaBox():
             "Sec-Fetch-Site": "same-origin"
         })
         data = urlencode({"login":login, "password":password, "mode":mode})
-        d:Callable = pq(self.session.post(self.base_url+"login.php", headers=headers, data=data).content.decode("UTF-8"))
-        root:Callable = d("root")
-        if int(root("status").text()) == 0:
+        d:str = self.session.post(self.base_url+"login.php", headers=headers, data=data).text
+        root:str = self.tag_between("root", d)
+        if int(self.tag_between("status", root)) == 0:
             raise ValueError("username or password is not correct")
-        account:Callable = root("account")
-        transaction:Callable = root("transaction")
+        account:str = self.tag_between("account", root)
+        transaction:str = self.tag_between("transaction", root)
         return {
-            "status": int(root("status").text()),
-            "login": root("login").text(),
+            "status": int(self.tag_between("status", root)),
+            "login": self.tag_between("login", root),
             "account": {
-                "characters": account("characters").text(),
-                "id": int(account("id").text()),
+                "characters": self.tag_between("characters", account),
+                "id": int(self.tag_between("id", account)),
             },
-            "firstname": root("firstname").text(),
-            "logincount": int(root("logincount").text()),
-            "firstlogin": root("firstlogin").text(),
+            "firstname": self.tag_between("firstname", root),
+            "logincount": int(self.tag_between("logincount", root)),
+            "firstlogin": self.tag_between("firstlogin", root),
             "transaction": {
-                "id": int(transaction("id").text()),
-                "boxname": transaction("boxname").text(),
-                "acaboxfilename": transaction("acaboxfilename").text()
+                "id": int(self.tag_between("id", transaction)),
+                "boxname": self.tag_between("boxname", transaction),
+                "acaboxfilename": self.tag_between("acaboxfilename", transaction)
             }
         }
 
     def get_languages(self)->List[dict]:
-        htmlpage:str = self.index_page
-        d:Callable = pq(htmlpage)
-        select:Callable = d("#acaboxlanguage_cb")
-        options:Iterable = select("option")
-        languages:List[dict] = []
-        for option in options:
-            languages.append({
-                "id": pq(option).attr("data-id").strip(),
-                "iso": pq(option).attr("data-language").strip(),
-                "language": pq(option).text().strip()
-            })
-        return languages
+        return data.languages
 
     def get_audioformats(self)->List[dict]:
-        htmlpage:str = self.index_page
-        d:Callable = pq(htmlpage)
-        select:Callable = d("#audioformat_cb")
-        options:Iterable = select("option")
-        audioformats:List[dict] = []
-        for option in options:
-            audioformats.append({
-                "id": pq(option).attr("id").strip(),
-                "value": pq(option).attr("value").strip(),
-                "text": pq(option).text().strip()
-            })
-        return audioformats
+        return data.audioformats
 
     def get_voices(self, iso:str)->List[dict]:
         if not type(iso) == str:
             ValueError("iso must be str")
         if "-" not in iso or len(iso) < 5:
             ValueError("iso must be country code hyphen language code two letters")
-        data = {"ISO":iso}
-        htmlpage:str = self.session.post(self.base_url+"filtervoices.php", data=data).content.decode("UTF-8")
-        d:Callable = pq(htmlpage)
-        select:Callable = d("#acaboxvoice_cb")
-        options:Iterable = select("option")
-        voices:List[dict] = []
-        for option in options:
-            voices.append({
-                "id": pq(option).attr("data-id").strip(),
-                "language": pq(option).attr("data-language").strip(),
-                "features": pq(option).attr("data-features").strip(),
-                "value": pq(option).attr("value").strip(),
-                "text": pq(option).text().strip()
-            })
-        return voices
+        return [v for v in data.voices if v['language'] == iso]
 
     def get_text_info(self, text:str, voice:str, voiceid:str, byline:Optional[int] = 0)->dict:
+        self.get_index_page()
         data = {"voice":voice,"voiceid":voiceid,"byline":byline}
         j = self.session.post(self.base_url+"GetTextInfo.php", data=data).json()
         return j
@@ -125,6 +98,7 @@ class AcapelaBox():
         ts:Optional[int] = math.floor(time.time())
     )->dict:
         # notes: voice == voiceid
+        self.get_index_page()
         text = r"\vct={vct}\ \spd={spd}\ {text}".format(vct=vct, spd=spd, text=text)
         data = {
             "voice":voice,
@@ -153,6 +127,7 @@ class AcapelaBox():
         session:Optional[str] = "save"
     )->dict:
         # notes: voice == voiceid, plus, not %20 in text spaces
+        self.get_index_page()
         data = {
             "voice":voice,
             "speechrate":speechrate,
