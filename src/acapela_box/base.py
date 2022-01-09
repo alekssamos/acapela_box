@@ -118,12 +118,12 @@ class AcapelaBox():
         self,
         text:str,
         voice:str,
-        format:str,
-        listen:Optional[int] = 1,
-        vct:Optional[int] = 100,
         spd:Optional[int] = 180,
-        codecMP3:Optional[int] = 1,
+        vct:Optional[int] = 100,
+        format:int = 1,
         byline:Optional[int] = 0,
+        listen:Optional[int] = 1,
+        codecMP3:Optional[int] = 1,
         ts:Optional[int] = math.floor(time.time())
     )->dict:
         # notes: voice == voiceid
