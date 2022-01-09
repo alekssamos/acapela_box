@@ -1,11 +1,14 @@
 """Base classes for Acapela-box.com website communication."""
+import math
 import re
 import time
-import math
+from typing import Callable, Iterable, List, Optional, Union
 from urllib.parse import urlencode
-from typing import List, Optional, Iterable, Callable, Union
+
 import requests
+
 from . import data
+
 
 class AcapelaBoxError(Exception):
     """Base exception class for Acapela Box related errors."""
@@ -31,6 +34,18 @@ class LanguageNotSupportedError(AcapelaBoxError):
 
 
 class AcapelaBox():
+    """the basic class
+
+    Raises:
+        NeedsUpdateError: In case of changes on the website
+        InvalidCredentialsError: Username or password is not correct
+        TypeError: Invalid data type
+        ValueError: Value not found
+        LanguageNotSupportedError: You have passed an unknown language code
+
+    Returns:
+        AcapelaBox: A class instance
+    """
     base_url:str = "https://acapela-box.com/AcaBox/"
     session:requests.Session = requests.Session()
     # session.verify=False
@@ -42,23 +57,69 @@ class AcapelaBox():
     })
     index_page:str = ''
     def __init__(self):
+        """Initializing a class
+        """
         pass  
 
     def get_index_page(self, reload_page:Optional[bool] = False)->str:
+        """Refer to the main page of the site
+
+        Args:
+            reload_page (Optional[bool], optional): Load again from the Internet or take an already loaded page from the cache. Defaults to False.
+
+        Returns:
+            str: [The HTML code]
+        """
         if reload_page or self.index_page == '':
             self.index_page = self.session.get(self.base_url+"index.php").text
         return self.index_page
 
     def between(self, start:str, end:str, string:str)->str:
+        """Get a substring between the start and end strings
+
+        Args:
+            start (str): The begin substring
+            end (str): end substring
+            string (str): full string
+        Raises:
+            ValueError: if the index string method found no matches
+        Returns:
+            str: the substring being searched for
+        """
         return string[string.index(start)+len(start):string.index(end)]
 
     def tag_between(self, tagname:str, string:str)->str:
+        """Get text between XML tags
+
+        Args:
+            tagname (str): The tagname without less and more
+            string (str): XML code
+
+        Raises:
+            NeedsUpdateError: The desired tag was not found
+
+        Returns:
+            str: The extracted text
+        """
         try:
             return self.between(f"<{tagname}>", f"</{tagname}>", string)
         except ValueError:
             raise NeedsUpdateError(f"Can't get the information from {tagname}")
 
     def login(self, login:str, password:str, mode:Optional[str] = "login")->dict:
+        """Log in to the site
+
+        Args:
+            login (str): username
+            password (str): password
+            mode (Optional[str], optional): mode. Defaults to "login".
+
+        Raises:
+            InvalidCredentialsError: You have entered the wrong username and password pair
+
+        Returns:
+            dict: Information about your account
+        """
         self.get_index_page()
         headers = self.session.headers.copy()
         headers.update({
@@ -94,12 +155,35 @@ class AcapelaBox():
         }
 
     def get_languages(self)->List[dict]:
+        """Get a list of all supported languages
+
+        Returns:
+            List[dict]: list of languages
+        """
         return data.languages
 
     def get_audioformats(self)->List[dict]:
+        """Get a list of supported audio formats
+
+        Returns:
+            List[dict]: List of formats
+        """
         return data.audioformats
 
     def get_voices(self, iso:str)->List[dict]:
+        """Get a list of voices
+
+        Args:
+            iso (str): the country code and the language code are two letters separated by a hyphen
+
+        Raises:
+            TypeError: Wrong data type
+            ValueError: Error in the value
+            LanguageNotSupportedError: This language is not supported
+
+        Returns:
+            List[dict]: voice list
+        """
         if not type(iso) == str:
             raise TypeError("iso must be str")
         if "-" not in iso or len(iso) < 5 or len(iso) > 9:
@@ -109,6 +193,17 @@ class AcapelaBox():
         return [v for v in data.voices if v['language'] == iso]
 
     def get_text_info(self, text:str, voice:str, voiceid:str, byline:Optional[int] = 0)->dict:
+        """Get information about the entered text
+
+        Args:
+            text (str): The text
+            voice (str): voice value
+            voiceid (str): voice ID
+            byline (Optional[int], optional): Export by line. Maybe 1 or 0. Defaults to 0.
+
+        Returns:
+            dict: The info about the text
+        """
         self.get_index_page()
         data = {"voice":voice,"voiceid":voiceid,"byline":byline}
         j:dict = self.session.post(self.base_url+"GetTextInfo.php", data=data).json()
@@ -126,7 +221,22 @@ class AcapelaBox():
         codecMP3:Optional[int] = 1,
         ts:Optional[int] = math.floor(time.time())
     )->dict:
-        # notes: voice == voiceid
+        """Synthesize text
+
+        Args:
+            text (str): The text to be spoken. SPD and vct tags are supported
+            voice (str): voice ID
+            spd (Optional[int], optional): Speech rate. Defaults to 180 (average value).
+            vct (Optional[int], optional): Speech pitch. Defaults to 100 (average value).
+            format (int, optional): Audio file format (value). Defaults to 1.
+            byline (Optional[int], optional): Export by line. It can be 1 or 0. Defaults to 0.
+            listen (Optional[int], optional): Have you clicked the listen button on the website?. Defaults to 1.
+            codecMP3 (Optional[int], optional): This parameter is always 1, even if a different format is specified. Defaults to 1.
+            ts (Optional[int], optional): Request timestamp. Defaults to math.floor(time.time()).
+
+        Returns:
+            dict: Information about the audio recording, a direct link to the audio file is in `snd_url`
+        """
         self.get_index_page()
         text = r"\vct={vct}\ \spd={spd}\ {text}".format(vct=vct, spd=spd, text=text)
         data = {
@@ -155,7 +265,22 @@ class AcapelaBox():
         exportlinebyline:Optional[int] = 0,
         session:Optional[str] = "save"
     )->dict:
-        # notes: voice == voiceid, plus, not %20 in text spaces
+        """Save the text and its parameters to the session on the website
+
+        Args:
+            text (str): The text to pronounce that needs to be saved
+            voice (str): voice ID
+            audioformat (int): audioformat value
+            speechrate (Optional[int], optional): Speech rate to save settings. Defaults to 180.
+            vocaltract (Optional[int], optional): I don't know what it is yet. Defaults to 100.
+            fontsize (Optional[int], optional): Font size in the text field on the website. Defaults to 13.
+            automatictextname (Optional[int], optional): Not sure what it is. Defaults to 0.
+            exportlinebyline (Optional[int], optional): Export text by lines? 1 or 0. Defaults to 0.
+            session (Optional[str], optional): action? I'm not sure. Defaults to "save".
+
+        Returns:
+            dict: The info about this session?
+        """
         self.get_index_page()
         data = {
             "voice":voice,
@@ -172,6 +297,15 @@ class AcapelaBox():
         return j
 
     def download_file(self, url:str, filename:str)->int:
+        """Download file.
+
+        Args:
+            url (str): Direct link to the file
+            filename (str): The path and name of the file where it will be saved on your device
+
+        Returns:
+            int: The size of the recorded data in the file in bytes
+        """
         total_size:int = 0
         r = self.session.get(url, stream=True)
         r.raise_for_status()
