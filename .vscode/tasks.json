@@ -1,0 +1,35 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run tests",
+            "type": "process",
+            // "windows":{"command": "python"},
+            // "linux":{"command": "python3"},
+            "command": "${config:python.pythonPath}",
+            "options": {
+                "cwd": "${workspaceFolder}${pathSeparator}src"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            },
+            "args": [
+                "-m",
+                "pytest",
+                ".."
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
