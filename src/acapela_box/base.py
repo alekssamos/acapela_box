@@ -172,6 +172,12 @@ class AcapelaBox():
         return j
 
     def download_file(self, url:str, filename:str)->int:
+        total_size:int = 0
+        r = self.session.get(url, stream=True)
+        r.raise_for_status()
         with open(filename, "wb") as f:
-            return f.write(self.session.get(url).content)
-
+            for chunk in r.iter_content(chunk_size=1024): 
+                if chunk:
+                    total_size += f.write(chunk)
+                    f.flush()
+        return total_size
