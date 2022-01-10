@@ -5,6 +5,10 @@
 acapela_ voices online not official API
 
 ## installing
+`pip install acapela-box`
+
+or
+
 `pip install https://github.com/alekssamos/acapela_box/archive/refs/heads/master.zip`
 
 ## using
