@@ -4,7 +4,7 @@ from .base import (AcapelaBox, InvalidCredentialsError,
                    LanguageNotSupportedError, NeedsUpdateError)
 
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 __title__ = 'acapela_box'
 __name__ = 'acapela_box'

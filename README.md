@@ -9,8 +9,8 @@ acapela_ voices online not official API
 
 ## using
 see file ./example1.py
+
 or from command line
-see
 ```bash
 $ acapela_box "fr-FR" "AntoineFromAfar"     "Ce module est développé par un français."
 https://vaasbox.acapela-box.com/MESSAGES/013099097112101108097066111120095086050/Listen.php?q=NiivxaaFRPDRk2FD7Lfg!CV7fN
