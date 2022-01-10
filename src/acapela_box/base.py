@@ -236,7 +236,7 @@ class AcapelaBox():
         voice: str,
         spd: Optional[int] = 180,
         vct: Optional[int] = 100,
-        format: int = 1,
+        format: Optional[int] = 1,
         byline: Optional[int] = 0,
         listen: Optional[int] = 1,
         codecMP3: Optional[int] = 1,
@@ -249,7 +249,7 @@ class AcapelaBox():
             voice (str): voice ID
             spd (Optional[int], optional): Speech rate. Defaults to 180 (average value).
             vct (Optional[int], optional): Speech pitch. Defaults to 100 (average value).
-            format (int, optional): Audio file format (value). Defaults to 1.
+            format (Optional[int], optional): Audio file format (value). Defaults to 1.
             byline (Optional[int], optional): Export by line. It can be 1 or 0. Defaults to 0.
             listen (Optional[int], optional): Have you clicked the listen button on the website?. Defaults to 1.
             codecMP3 (Optional[int], optional): This parameter is always 1, even if a different format is specified. Defaults to 1.
@@ -283,7 +283,7 @@ class AcapelaBox():
         self,
         text: str,
         voice: str,
-        audioformat: int,
+        audioformat: Optional[int] = 1,
         speechrate: Optional[int] = 180,
         vocaltract: Optional[int] = 100,
         fontsize: Optional[int] = 13,
@@ -296,7 +296,7 @@ class AcapelaBox():
         Args:
             text (str): The text to pronounce that needs to be saved
             voice (str): voice ID
-            audioformat (int): audioformat value
+            audioformat (Optional[int], optional): audioformat value. Defaults to 1 (MP3)
             speechrate (Optional[int], optional): Speech rate to save settings. Defaults to 180.
             vocaltract (Optional[int], optional): I don't know what it is yet. Defaults to 100.
             fontsize (Optional[int], optional): Font size in the text field on the website. Defaults to 13.
@@ -345,3 +345,76 @@ class AcapelaBox():
                     total_size += f.write(chunk)
                     f.flush()
         return total_size
+
+    def authenticate(self, username: str, password: str):
+        """Authenticate against the website using `login` and `password`.
+
+        The session will use the provided credentials to scrap the website.
+        It is useful mostly for retrieving sound with no background music
+        set when an anonymous user listens to a text-to-speech sound.
+
+        To obtain some credentials, you must register here:
+        https://www.acapela-box.com/
+
+        Args:
+            username: The account's username used for registration.
+            password: The account's password used for registration.
+
+        Note:
+            If no exception
+                is raised, then the authentication succeeded.
+
+        Raises:
+            AcapelaBoxError: something went wrong while authenticating.
+        """
+
+        self.login(username, password)
+
+    def get_mp3_url(self, language:str, voice:str, text:str, spd:Optional[int] = 180, vct:Optional[int] = 100, format:Optional[int] = 1, byline: Optional[int] = 0):
+        """Retrieve the mp3 url associated to the settings.
+
+        To see the list of supported languages and voices, check the `data` module.
+
+        Args:
+            language (str): The language to use for the acapela.
+            voice (str): The voice name to use for the acapela.
+            text (str): the text to translate to speech.
+            spd (Optional[int], optional): Speech rate. Defaults to 180 (average value).
+            vct (Optional[int], optional): Speech pitch. Defaults to 100 (average value).
+            format (int, optional): Audio file format (value). Defaults to 1.
+            byline (Optional[int], optional): Export by line. It can be 1 or 0. Defaults to 0.
+
+        Raises:
+            NeedsUpdateError: The module needs an update since the mp3
+                url could not have been extracted, somehow.
+
+        Returns:
+            str: An HTTP url pointing to the generated mp3.
+        """
+
+        selected_lang = None
+        selected_voice = None
+        for l in self.get_languages():
+            if language in (l['iso'], l['language'], str(l['id'])):
+                selected_lang = l['iso']
+        if selected_lang is None:
+            raise LanguageNotSupportedError("You specified the wrong language")
+        for v in self.get_voices(selected_lang):
+            if voice in (v['value'], v['text'], v['id']):
+                selected_voice = v
+        if selected_voice is None:
+            raise ValueError("Voice not found")
+        if not str(format).isdigit():
+            raise TypeError("The format is indicated by a digit")
+        try:
+            self.acabox_flashsession(text=text, voice=v['id'], audioformat=format)
+            return self.dovaas(
+                voice=voice,
+                text=text,
+                spd=spd,
+                vct=vct,
+                format=format,
+                byline=byline
+            )['snd_url']
+        except KeyError:
+            raise NeedsUpdateError("I can't extract the link to the audio")

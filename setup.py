@@ -65,11 +65,11 @@ setup(
     url=META['uri'],
     package_dir={'': 'src'},
     packages=find_packages('src'),
-    #entry_points={
-        #'console_scripts': [
-            #'acapela_box=acapela_box.__main__:main',
-        #],
-    #},
+    entry_points={
+        'console_scripts': [
+            'acapela_box=acapela_box.__main__:main',
+        ],
+    },
     install_requires=INSTALL_REQUIRES,
     tests_require=TESTS_REQUIRE,
 )

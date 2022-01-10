@@ -9,3 +9,10 @@ acapela_ voices online not official API
 
 ## using
 see file ./example1.py
+or from command line
+see
+```bash
+python -m acapela_box --help
+```
+
+This library is compatible with [Ge0/acapela-group](https://github.com/Ge0/acapela-group)
