@@ -7,3 +7,4 @@ pydocstyle
 autopep8
 isort
 tox
+docformatter
