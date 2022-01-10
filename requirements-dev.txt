@@ -5,8 +5,6 @@ mypy==0.931
 pytest==6.2.5
 pydocstyle
 autopep8
-isort
 tox
 docformatter
-add-trailing-comma
 pre-commit
