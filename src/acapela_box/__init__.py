@@ -1,7 +1,8 @@
 """Fetch generated tts sounds from Acapela Group."""
 
-from .base import (AcapelaBox,                                 InvalidCredentialsError,
-                                LanguageNotSupportedError, NeedsUpdateError)
+from .base import (AcapelaBox, InvalidCredentialsError,
+                   LanguageNotSupportedError, NeedsUpdateError)
+
 
 __version__ = '1.0'
 
