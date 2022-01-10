@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from acapela_box import AcapelaBox
 
+
 ab:AcapelaBox = AcapelaBox()
 ls:list = ab.get_languages()
 print(ls)

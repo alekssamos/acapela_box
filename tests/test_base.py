@@ -2,8 +2,9 @@ from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
-from acapela_box.base import (AcapelaBox,                                 InvalidCredentialsError,
-                                LanguageNotSupportedError, NeedsUpdateError)
+from acapela_box.base import (AcapelaBox, InvalidCredentialsError,
+                              LanguageNotSupportedError, NeedsUpdateError)
+
 
 get_index_page_mock = MagicMock(return_value="<p>yes</p>")
 
