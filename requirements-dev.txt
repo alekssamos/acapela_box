@@ -8,3 +8,5 @@ autopep8
 isort
 tox
 docformatter
+add-trailing-comma
+pre-commit

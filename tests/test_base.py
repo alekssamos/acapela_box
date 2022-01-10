@@ -128,12 +128,12 @@ def test_acapela_dovaas():
         "language": "en-AU",
         "features": "FMT_MP3,FMT_WAV22K,FMT_WAV8KA,FMT_WAV8KU,FMT_WAV8K,FLAG_DEFAULT",
         "value": "Tyler",
-        "text": "Tyler"
+        "text": "Tyler",
     }
     audioformat = {
         "id": "FMT_MP3",
         "value": "1",
-        "text": "MP3"
+        "text": "MP3",
     }
     listen = 1
     vct = 100
@@ -154,7 +154,7 @@ def test_acapela_dovaas():
             spd = spd,
             codecMP3 = codecMP3,
             byline = byline,
-            ts = ts
+            ts = ts,
         )
         name, args, kwargs = post_method.mock_calls[0]
         modified_text = r"\vct={vct}\ \spd={spd}\ {text}".format(vct=vct, spd=spd, text=text)
@@ -168,7 +168,7 @@ def test_acapela_dovaas():
             "spd": spd,
             "vct": vct,
             "codecMP3":codecMP3,
-            "ts":ts
+            "ts":ts,
         }
 
 def test_download_file():
