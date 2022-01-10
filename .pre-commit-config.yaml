@@ -1,12 +1,12 @@
 repos:
-  -   repo: https://github.com/pre-commit/mirrors-mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
     hooks:
-      -   id: mypy
+      - id: mypy
         args: [--no-strict-optional, --ignore-missing-imports]
-  -   repo: https://github.com/asottile/add-trailing-comma
+  - repo: https://github.com/asottile/add-trailing-comma
     rev: v2.2.1
     hooks:
-      -   id: add-trailing-comma
+      - id: add-trailing-comma
   - repo: https://github.com/pycqa/isort
     rev: 5.5.2
     hooks:
