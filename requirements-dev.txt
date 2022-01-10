@@ -1,4 +1,9 @@
+-r requirements.txt
 types-requests==2.26.3
 typing-extensions==3.10.0.2
 mypy==0.931
 pytest==6.2.5
+pydocstyle
+autopep8
+isort
+tox
