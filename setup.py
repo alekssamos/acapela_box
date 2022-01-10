@@ -51,6 +51,7 @@ def get_meta():
     return meta
 
 
+long_description_content_type="text/markdown"
 LONG_DESCRIPTION = get_description()
 META = get_meta()
 
@@ -59,6 +60,7 @@ setup(
     name=META['name'],
     version=META['version'],
     description=META['description'],
+    long_description_content_type=long_description_content_type,
     long_description=LONG_DESCRIPTION,
     author=META['author'],
     author_email=META['email'],
