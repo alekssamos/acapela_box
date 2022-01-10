@@ -9,8 +9,8 @@ from .base import AcapelaBox, AcapelaBoxError
 @click.argument("language")
 @click.argument("voice")
 @click.argument("text")
-@click.option("--username", default="", help="Acapela Box username (if authenticating).")
-@click.option("--password", default="", help="Acapela Box password (if authenticating).")
+@click.option("--username", help="Acapela Box username (if authenticating).")
+@click.option("--password", help="Acapela Box password (if authenticating).")
 @click.option("--spd", default=180, help="Speech rate (speed).")
 @click.option("--vct", default=100, help="Speech velocity (pitch).")
 @click.option("--format", default=100, help="""
@@ -22,7 +22,7 @@ Audio format. A number from 1 to 5. It can be:
     5. WAV 8kHz;
 """)
 @click.option("--byline", default=0, help="Export by line?")
-def main(language, voice, text, username=None, password=None):
+def main(language, voice, text, username=None, password=None, spd=None, vct=None, format=None, byline=None):
     """Fetch generated tts sounds from Acapela Box."""
     acapela_box = AcapelaBox()
 
