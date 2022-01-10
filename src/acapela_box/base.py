@@ -409,7 +409,7 @@ class AcapelaBox():
         try:
             self.acabox_flashsession(text=text, voice=v['id'], audioformat=format)
             return self.dovaas(
-                voice=voice,
+                voice=v['id'],
                 text=text,
                 spd=spd,
                 vct=vct,
