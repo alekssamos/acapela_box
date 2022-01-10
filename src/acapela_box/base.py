@@ -21,8 +21,8 @@ class InvalidCredentialsError(AcapelaBoxError):
 class NeedsUpdateError(AcapelaBoxError):
     """Exception class thrown when the code cannot scrap the website.
 
-    Basically, it means that the module needs some update to keep interfacing
-    with the Acapela Box website.
+    Basically, it means that the module needs some update to keep
+    interfacing with the Acapela Box website.
     """
 
 
@@ -34,7 +34,7 @@ class LanguageNotSupportedError(AcapelaBoxError):
 
 
 class AcapelaBox():
-    """the basic class
+    """the basic class.
 
     Raises:
         NeedsUpdateError: In case of changes on the website
@@ -58,12 +58,11 @@ class AcapelaBox():
     index_page: str = ''
 
     def __init__(self):
-        """Initializing a class
-        """
+        """Initializing a class."""
         pass
 
     def get_index_page(self, reload_page: Optional[bool] = False) -> str:
-        """Refer to the main page of the site
+        """Refer to the main page of the site.
 
         Args:
             reload_page (Optional[bool], optional): Load again from the Internet or take an already loaded page from the cache. Defaults to False.
@@ -77,7 +76,7 @@ class AcapelaBox():
         return self.index_page
 
     def between(self, start: str, end: str, string: str) -> str:
-        """Get a substring between the start and end strings
+        """Get a substring between the start and end strings.
 
         Args:
             start (str): The begin substring
@@ -91,7 +90,7 @@ class AcapelaBox():
         return string[string.index(start) + len(start):string.index(end)]
 
     def tag_between(self, tagname: str, string: str) -> str:
-        """Get text between XML tags
+        """Get text between XML tags.
 
         Args:
             tagname (str): The tagname without less and more
@@ -110,7 +109,7 @@ class AcapelaBox():
 
     def login(self, login: str, password: str,
               mode: Optional[str] = "login") -> dict:
-        """Log in to the site
+        """Log in to the site.
 
         Args:
             login (str): username
@@ -161,7 +160,7 @@ class AcapelaBox():
         }
 
     def get_languages(self) -> List[dict]:
-        """Get a list of all supported languages
+        """Get a list of all supported languages.
 
         Returns:
             List[dict]: list of languages
@@ -169,7 +168,7 @@ class AcapelaBox():
         return data.languages
 
     def get_audioformats(self) -> List[dict]:
-        """Get a list of supported audio formats
+        """Get a list of supported audio formats.
 
         Returns:
             List[dict]: List of formats
@@ -177,7 +176,7 @@ class AcapelaBox():
         return data.audioformats
 
     def get_voices(self, iso: str) -> List[dict]:
-        """Get a list of voices
+        """Get a list of voices.
 
         Args:
             iso (str): the country code and the language code are two letters separated by a hyphen
@@ -205,7 +204,7 @@ class AcapelaBox():
             voice: str,
             voiceid: str,
             byline: Optional[int] = 0) -> dict:
-        """Get information about the entered text
+        """Get information about the entered text.
 
         Args:
             text (str): The text
@@ -236,7 +235,7 @@ class AcapelaBox():
         codecMP3: Optional[int] = 1,
         ts: Optional[int] = math.floor(time.time())
     ) -> dict:
-        """Synthesize text
+        """Synthesize text.
 
         Args:
             text (str): The text to be spoken. SPD and vct tags are supported
@@ -283,7 +282,7 @@ class AcapelaBox():
         exportlinebyline: Optional[int] = 0,
         session: Optional[str] = "save"
     ) -> dict:
-        """Save the text and its parameters to the session on the website
+        """Save the text and its parameters to the session on the website.
 
         Args:
             text (str): The text to pronounce that needs to be saved
