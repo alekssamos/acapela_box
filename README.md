@@ -12,7 +12,9 @@ see file ./example1.py
 or from command line
 see
 ```bash
-python -m acapela_box --help
+$ acapela_box "fr-FR" "AntoineFromAfar"     "Ce module est développé par un français."
+https://vaasbox.acapela-box.com/MESSAGES/013099097112101108097066111120095086050/Listen.php?q=NiivxaaFRPDRk2FD7Lfg!CV7fN
+MzZD!aYmkMKE_u1OIUZmfHJWx1IW09pewrMyoZ.mp3
 ```
 
 This library is compatible with [Ge0/acapela-group](https://github.com/Ge0/acapela-group)
